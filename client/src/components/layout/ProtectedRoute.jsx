@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="page-center">
+      <div className="flex flex-1 items-center justify-center">
         <Spinner />
       </div>
     );

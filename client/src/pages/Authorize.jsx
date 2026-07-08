@@ -4,7 +4,11 @@ import { getAuthorizationRequest, submitAuthorizationDecision } from '../api/oau
 import { getErrorMessage } from '../utils/apiError';
 import Card from '../components/ui/Card';
 import Alert from '../components/ui/Alert';
+import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
+
+const scopeBadgeCls =
+  'mr-1.5 inline-block rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs text-violet-600 dark:text-violet-400';
 
 export default function Authorize() {
   const [searchParams] = useSearchParams();
@@ -70,8 +74,8 @@ export default function Authorize() {
 
   if (loading) {
     return (
-      <main>
-        <div className="page-center">
+      <main className="mx-auto w-full max-w-[720px] flex-1 px-6 py-10">
+        <div className="flex flex-1 items-center justify-center">
           <Spinner label="Validating authorization request…" />
         </div>
       </main>
@@ -80,8 +84,10 @@ export default function Authorize() {
 
   if (error) {
     return (
-      <main>
-        <h1>Authorization request</h1>
+      <main className="mx-auto w-full max-w-[720px] flex-1 px-6 py-10">
+        <h1 className="my-8 text-4xl font-semibold text-gray-900 dark:text-gray-100">
+          Authorization request
+        </h1>
         <Alert>{error}</Alert>
       </main>
     );
@@ -90,40 +96,30 @@ export default function Authorize() {
   const scopes = consent.scope ? consent.scope.split(' ') : [];
 
   return (
-    <main>
-      <h1>Authorize application</h1>
+    <main className="mx-auto w-full max-w-[720px] flex-1 px-6 py-10">
+      <h1 className="my-8 text-4xl font-semibold text-gray-900 dark:text-gray-100">
+        Authorize application
+      </h1>
       <Card>
-        <p>
+        <p className="text-gray-700 dark:text-gray-300">
           <strong>{consent.client.name}</strong> is requesting access to your account.
         </p>
-        <p className="muted">Client ID: {consent.client.clientId}</p>
-        <div style={{ margin: '16px 0' }}>
-          <p className="muted" style={{ marginBottom: 8 }}>
-            This application will be able to:
-          </p>
+        <p className="text-sm text-gray-500">Client ID: {consent.client.clientId}</p>
+        <div className="my-4">
+          <p className="mb-2 text-sm text-gray-500">This application will be able to:</p>
           {scopes.map((scope) => (
-            <span className="scope-badge" key={scope}>
+            <span className={scopeBadgeCls} key={scope}>
               {scope}
             </span>
           ))}
         </div>
-        <div className="btn-row">
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={deciding}
-            onClick={() => decide('allow')}
-          >
+        <div className="mt-5 flex gap-3">
+          <Button type="button" disabled={deciding} onClick={() => decide('allow')}>
             Allow
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={deciding}
-            onClick={() => decide('deny')}
-          >
+          </Button>
+          <Button type="button" variant="secondary" disabled={deciding} onClick={() => decide('deny')}>
             Deny
-          </button>
+          </Button>
         </div>
       </Card>
     </main>

@@ -22,26 +22,34 @@ export function AuthProvider({ children }) {
   // On first load the browser only has the HttpOnly refresh_token cookie (if any) - there
   // is no access token in memory yet. Try to silently mint one so a page refresh doesn't
   // log the user out.
+  const hasBootstrapped = useRef(false);
+
   useEffect(() => {
-    let cancelled = false;
+    // Refresh tokens are single-use (rotation). React 18 StrictMode double-invokes
+    // effects in dev - mount, cleanup, mount again, synchronously - which would
+    // otherwise fire /auth/refresh twice: the second call would present an
+    // already-rotated token and trip theft detection, revoking the session it just
+    // created. The ref guard makes the body run only once for real. (A `cancelled`
+    // flag set by the synthetic cleanup would break this too, since AuthProvider
+    // never truly unmounts during the app's lifetime - so this effect deliberately
+    // has no cleanup.)
+    if (hasBootstrapped.current) return;
+    hasBootstrapped.current = true;
 
     async function bootstrap() {
       try {
         const { accessToken } = await refreshSession();
         setAccessToken(accessToken);
         const currentUser = await getCurrentUser();
-        if (!cancelled) setUser(currentUser);
+        setUser(currentUser);
       } catch {
-        if (!cancelled) clearSession();
+        clearSession();
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
 
     bootstrap();
-    return () => {
-      cancelled = true;
-    };
   }, [clearSession]);
 
   const register = useCallback(async (payload) => {

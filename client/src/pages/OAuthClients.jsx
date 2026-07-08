@@ -9,7 +9,17 @@ import { SUPPORTED_SCOPES, DEFAULT_SCOPE } from '../utils/oauthConstants';
 import { getDemoClientSecret, saveDemoClientSecret, savePendingAuthFlow } from '../utils/demoStorage';
 import Card from '../components/ui/Card';
 import Alert from '../components/ui/Alert';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
+
+const labelCls = 'mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100';
+const fieldCls = 'mb-4 text-left';
+const errorCls = 'mt-1 text-xs text-red-500';
+const hintCls = 'mt-1 text-xs text-gray-500';
+const tokenBoxCls = 'mb-2.5 break-all rounded-md bg-gray-100 p-3 text-left text-xs dark:bg-gray-800';
+const scopeBadgeCls =
+  'mr-1.5 inline-block rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs text-violet-600 dark:text-violet-400';
 
 const defaultRedirectUri = `${window.location.origin}/oauth/callback`;
 
@@ -81,22 +91,22 @@ export default function OAuthClients() {
   }
 
   return (
-    <main className="wide">
-      <h1>OAuth clients</h1>
-      <p className="muted">
-        Register a third-party application that will use this server for the
-        Authorization Code Flow.
+    <main className="mx-auto w-full max-w-[960px] flex-1 px-6 py-10">
+      <h1 className="my-8 text-4xl font-semibold text-gray-900 dark:text-gray-100">OAuth clients</h1>
+      <p className="text-sm text-gray-500">
+        Register a third-party application that will use this server for the Authorization Code
+        Flow.
       </p>
 
-      <Card title="Register a new client">
+      <Card title="Register a new client" className="mt-6">
         <Alert>{serverError}</Alert>
 
         {newlyCreated && (
           <Alert variant="success">
-            <strong>{newlyCreated.client.name}</strong> registered. Copy the client
-            secret now - it will not be shown again. It has also been saved to this
-            browser's local storage so this demo can complete the token exchange step.
-            <div className="token-box" style={{ marginTop: 10 }}>
+            <strong>{newlyCreated.client.name}</strong> registered. Copy the client secret now - it
+            will not be shown again. It has also been saved to this browser's local storage so this
+            demo can complete the token exchange step.
+            <div className={`${tokenBoxCls} mt-2.5`}>
               client_id: {newlyCreated.client.clientId}
               <br />
               client_secret: {newlyCreated.clientSecret}
@@ -105,38 +115,41 @@ export default function OAuthClients() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="form-field">
-            <label htmlFor="name">Client name</label>
-            <input id="name" type="text" {...register('name')} />
-            {errors.name && <p className="form-error">{errors.name.message}</p>}
+          <div className={fieldCls}>
+            <label htmlFor="name" className={labelCls}>
+              Client name
+            </label>
+            <Input id="name" type="text" hasError={!!errors.name} {...register('name')} />
+            {errors.name && <p className={errorCls}>{errors.name.message}</p>}
           </div>
 
-          <div className="form-field">
-            <label htmlFor="redirectUris">Redirect URIs (one per line)</label>
-            <textarea id="redirectUris" {...register('redirectUris')} />
-            {errors.redirectUris && <p className="form-error">{errors.redirectUris.message}</p>}
-            <p className="form-hint">
-              Defaults to this app's own callback route so the demo can complete the
-              flow end to end.
+          <div className={fieldCls}>
+            <label htmlFor="redirectUris" className={labelCls}>
+              Redirect URIs (one per line)
+            </label>
+            <Input as="textarea" id="redirectUris" hasError={!!errors.redirectUris} {...register('redirectUris')} />
+            {errors.redirectUris && <p className={errorCls}>{errors.redirectUris.message}</p>}
+            <p className={hintCls}>
+              Defaults to this app's own callback route so the demo can complete the flow end to end.
             </p>
           </div>
 
-          <div className="form-field">
-            <label>Scopes</label>
-            <div className="checkbox-group">
+          <div className={fieldCls}>
+            <span className={labelCls}>Scopes</span>
+            <div className="flex flex-wrap gap-4">
               {SUPPORTED_SCOPES.map((scope) => (
-                <label key={scope}>
+                <label key={scope} className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
                   <input type="checkbox" value={scope} {...register('scopes')} />
                   {scope}
                 </label>
               ))}
             </div>
-            {errors.scopes && <p className="form-error">{errors.scopes.message}</p>}
+            {errors.scopes && <p className={errorCls}>{errors.scopes.message}</p>}
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Registering…' : 'Register client'}
-          </button>
+          </Button>
         </form>
       </Card>
 
@@ -145,33 +158,36 @@ export default function OAuthClients() {
         <Alert>{listError}</Alert>
 
         {!listLoading && !listError && clients.length === 0 && (
-          <p className="muted">No OAuth clients registered yet.</p>
+          <p className="text-sm text-gray-500">No OAuth clients registered yet.</p>
         )}
 
         {!listLoading && clients.length > 0 && (
-          <ul className="client-list">
+          <ul className="m-0 list-none p-0 text-left">
             {clients.map((client) => {
               const hasSecret = Boolean(getDemoClientSecret(client.clientId));
               return (
-                <li key={client.clientId}>
-                  <strong>{client.name}</strong> <span className="muted">({client.clientId})</span>
-                  <div className="muted" style={{ margin: '6px 0' }}>
+                <li
+                  key={client.clientId}
+                  className="mb-2.5 rounded-lg border border-gray-200 p-3.5 dark:border-gray-800"
+                >
+                  <strong className="text-gray-900 dark:text-gray-100">{client.name}</strong>{' '}
+                  <span className="text-sm text-gray-500">({client.clientId})</span>
+                  <div className="my-1.5 text-sm text-gray-500">
                     Redirect URIs: {client.redirectUris.join(', ')}
                   </div>
-                  <div style={{ marginBottom: 10 }}>
+                  <div className="mb-2.5">
                     {client.scopes.length === 0 ? (
-                      <span className="scope-badge">{DEFAULT_SCOPE} (default)</span>
+                      <span className={scopeBadgeCls}>{DEFAULT_SCOPE} (default)</span>
                     ) : (
                       client.scopes.map((s) => (
-                        <span className="scope-badge" key={s}>
+                        <span className={scopeBadgeCls} key={s}>
                           {s}
                         </span>
                       ))
                     )}
                   </div>
-                  <button
+                  <Button
                     type="button"
-                    className="btn btn-primary"
                     disabled={!hasSecret}
                     onClick={() => startAuthorization(client)}
                     title={
@@ -181,7 +197,7 @@ export default function OAuthClients() {
                     }
                   >
                     Start authorization
-                  </button>
+                  </Button>
                 </li>
               );
             })}
