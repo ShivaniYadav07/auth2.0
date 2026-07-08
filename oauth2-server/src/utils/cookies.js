@@ -14,7 +14,7 @@ export function getRefreshTokenCookieOptions() {
   return {
     httpOnly: true,
     secure: config.isProduction,
-    sameSite: 'strict',
+    sameSite: config.refreshToken.cookieSameSite,
     domain: config.refreshToken.cookieDomain,
     path: '/api/v1/auth',
     maxAge: config.refreshToken.ttlDays * 24 * 60 * 60 * 1000,

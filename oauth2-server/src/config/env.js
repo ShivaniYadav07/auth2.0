@@ -21,6 +21,10 @@ const envSchema = z.object({
 
   REFRESH_TOKEN_COOKIE_NAME: z.string().default('refresh_token'),
   COOKIE_DOMAIN: z.string().optional(),
+  // 'none' is required when the frontend and backend are on different sites (e.g. a
+  // Vercel frontend calling an onrender.com backend), otherwise the browser won't send
+  // the refresh cookie cross-site. 'none' only works alongside secure:true (HTTPS).
+  COOKIE_SAMESITE: z.enum(['strict', 'lax', 'none']).default('strict'),
 
   CORS_ALLOWED_ORIGINS: z.string().default(''),
 
@@ -64,6 +68,7 @@ export const config = {
     ttlDays: env.REFRESH_TOKEN_TTL_DAYS,
     cookieName: env.REFRESH_TOKEN_COOKIE_NAME,
     cookieDomain: env.COOKIE_DOMAIN,
+    cookieSameSite: env.COOKIE_SAMESITE,
   },
 
   authCode: {
