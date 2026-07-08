@@ -1,16 +1,56 @@
-# React + Vite
+# Client — OAuth 2.0 Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The React single-page app for the [OAuth 2.0 Authorization Server](../README.md). It is
+the login / consent UI for the backend and a live demonstration of the full Authorization
+Code Flow. Built with React 19, Vite, React Router, React Hook Form, Zod, Axios, and
+Tailwind CSS.
 
-Currently, two official plugins are available:
+> This is one half of a monorepo. For the big picture — the two-token model, how the
+> frontend talks to the backend, and the deployment setup — read the root
+> [README](../README.md) and [ARCHITECTURE](../ARCHITECTURE.md) first.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Project structure
 
-## React Compiler
+```
+src/
+  api/         the ONLY layer that talks to the backend (one axios instance + typed calls)
+  context/     AuthContext — global auth state and the silent-refresh bootstrap
+  pages/       route-level screens (Home, Login, Register, Dashboard, OAuth flow, errors)
+  components/  reusable UI — layout/ (Layout, ProtectedRoute) and ui/ (Button, Input, …)
+  schemas/     Zod schemas for form validation
+  utils/       framework-agnostic helpers: tokenStore, demoStorage, apiError, constants
+  App.jsx      route table + provider wiring
+  main.jsx     entry point
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Dependency direction is one-way: `pages → context → api → utils`, with `components` and
+`schemas` as leaves. `utils/` imports nothing from the app.
 
-## Expanding the Oxlint configuration
+## Getting started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+cp .env.example .env      # VITE_API_BASE_URL, defaults to http://localhost:4000/api/v1
+npm run dev               # http://localhost:5173
+```
+
+The backend must be running and must list this origin in its `CORS_ALLOWED_ORIGINS`.
+
+## Scripts
+
+```bash
+npm run dev       # Vite dev server with HMR
+npm run build     # production build to dist/
+npm run preview   # serve the production build locally
+npm run lint      # oxlint
+```
+
+## Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_BASE_URL` | Base URL of the backend API, including the `/api/v1` suffix. Inlined at **build time** — a change requires a rebuild. |
+
+For deployment (Vercel + Render, including the cross-site cookie configuration), see the
+root [README](../README.md#deployment). SPA deep-link routing is handled by
+[`vercel.json`](./vercel.json).
