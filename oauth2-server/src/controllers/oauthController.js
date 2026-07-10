@@ -84,7 +84,7 @@ export const submitAuthorizationDecision = asyncHandler(async (req, res) => {
 
   const code = await oauthService.issueAuthorizationCode({
     client,
-    userId: req.auth.userId,
+    userId: req.identityUser.id,
     redirectUri,
     scope: normalizedScope,
   });

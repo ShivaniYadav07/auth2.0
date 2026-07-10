@@ -20,6 +20,11 @@ const envSchema = z.object({
   AUTH_CODE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
 
   REFRESH_TOKEN_COOKIE_NAME: z.string().default('refresh_token'),
+  // The durable Identity Server browser session (see models/Session.js). This is what
+  // /oauth/authorize consults to answer "is this user already logged in?" - independent of
+  // any short-lived access token, exactly like accounts.google.com's session cookie.
+  SESSION_COOKIE_NAME: z.string().default('sid'),
+  SESSION_TTL_DAYS: z.coerce.number().int().positive().default(7),
   COOKIE_DOMAIN: z.string().optional(),
   // 'none' is required when the frontend and backend are on different sites (e.g. a
   // Vercel frontend calling an onrender.com backend), otherwise the browser won't send
@@ -67,6 +72,14 @@ export const config = {
   refreshToken: {
     ttlDays: env.REFRESH_TOKEN_TTL_DAYS,
     cookieName: env.REFRESH_TOKEN_COOKIE_NAME,
+    cookieDomain: env.COOKIE_DOMAIN,
+    cookieSameSite: env.COOKIE_SAMESITE,
+  },
+
+  session: {
+    ttlDays: env.SESSION_TTL_DAYS,
+    cookieName: env.SESSION_COOKIE_NAME,
+    // Shares the deployment-wide cookie domain/same-site policy with the refresh cookie.
     cookieDomain: env.COOKIE_DOMAIN,
     cookieSameSite: env.COOKIE_SAMESITE,
   },

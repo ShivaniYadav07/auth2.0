@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as oauthController from '../controllers/oauthController.js';
 import { authenticate } from '../middleware/authenticate.js';
+import { requireSession } from '../middleware/requireSession.js';
 import { validate } from '../middleware/validate.js';
 import { authLimiter } from '../middleware/rateLimiters.js';
 import { registerClientSchema } from '../validators/oauthClientValidators.js';
@@ -22,16 +23,18 @@ router.post(
 );
 router.get('/clients', authenticate, oauthController.listClients);
 
-// Authorization Code flow.
+// Authorization Code flow. These are gated on the Identity Server browser SESSION (the
+// `sid` cookie), not on a Bearer access token: the user must already be logged in to this
+// server - exactly like Google/Auth0's hosted consent pages - before consent is shown.
 router.get(
   '/authorize',
-  authenticate,
+  requireSession,
   validate(authorizeQuerySchema),
   oauthController.getAuthorizationRequest,
 );
 router.post(
   '/authorize/decision',
-  authenticate,
+  requireSession,
   validate(authorizeDecisionSchema),
   oauthController.submitAuthorizationDecision,
 );

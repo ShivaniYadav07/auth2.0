@@ -25,3 +25,24 @@ export function getClearCookieOptions() {
   const { maxAge: _maxAge, ...rest } = getRefreshTokenCookieOptions();
   return rest;
 }
+
+/**
+ * The Identity Server browser session cookie (`sid`). Unlike the refresh cookie, this is
+ * scoped to `path=/` because it must be readable by `/api/v1/oauth/authorize` - the OAuth
+ * consent flow needs to see the login session, not just the /auth endpoints.
+ */
+export function getSessionCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: config.isProduction,
+    sameSite: config.session.cookieSameSite,
+    domain: config.session.cookieDomain,
+    path: '/',
+    maxAge: config.session.ttlDays * 24 * 60 * 60 * 1000,
+  };
+}
+
+export function getClearSessionCookieOptions() {
+  const { maxAge: _maxAge, ...rest } = getSessionCookieOptions();
+  return rest;
+}
